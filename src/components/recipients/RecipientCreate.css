@@ -1,0 +1,357 @@
+/* Improved src/components/recipients/RecipientCreate.css */
+.recipient-create-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 24px auto;
+  padding: 0 20px 40px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.recipient-create-header {
+  margin-bottom: 24px;
+  padding-top: 24px;
+  width: 100%;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  color: #666;
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.back-button:hover {
+  color: #4A90E2;
+  transform: translateX(-2px);
+}
+
+.back-button .material-icons {
+  font-size: 18px;
+  margin-right: 4px;
+}
+
+.recipient-create-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  background-color: #FEECEC;
+  color: #E74C3C;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  border-radius: 4px;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.1);
+  animation: shakeError 0.5s ease-in-out;
+  width: 100%;
+}
+
+@keyframes shakeError {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.error-message .material-icons {
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.error-message p {
+  margin: 0;
+}
+
+.recipient-create-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  width: 100%;
+}
+
+.form-section {
+  margin-bottom: 32px;
+  width: 100%;
+}
+
+.form-section h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #F0F0F0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #F0F0F0;
+  width: 100%;
+}
+
+.section-header h2 {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.add-field-button {
+  display: flex;
+  align-items: center;
+  background-color: #F9FAFC;
+  color: #4A90E2;
+  border: 1px solid #E0E4E8;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-field-button:hover {
+  background-color: #F0F0F0;
+  transform: translateY(-2px);
+}
+
+.add-field-button .material-icons {
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 15px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #E0E4E8;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  height: 48px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+}
+
+.form-group input.error {
+  border-color: #E74C3C;
+}
+
+.error-text {
+  color: #E74C3C;
+  font-size: 12px;
+  margin: 4px 0 0 0;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  width: 100%;
+}
+
+.custom-fields-list {
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.custom-field-row {
+  display: grid;
+  grid-template-columns: 2fr 2fr 40px;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.custom-field-row .form-group {
+  margin-bottom: 0;
+}
+
+.remove-field-button {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background-color: #F9FAFC;
+  border: 1px solid #E0E4E8;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.remove-field-button:hover {
+  background-color: #F0F0F0;
+  color: #E74C3C;
+  transform: translateY(-2px);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #F0F0F0;
+  width: 100%;
+}
+
+.cancel-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  background-color: #F9FAFC;
+  border: 1px solid #E0E4E8;
+  border-radius: 4px;
+  color: #666;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.cancel-button:hover {
+  background-color: #F0F0F0;
+  transform: translateY(-2px);
+}
+
+.save-button {
+  padding: 12px 24px;
+  background-color: #4A90E2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 160px;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+}
+
+.save-button:hover:not(:disabled) {
+  background-color: #3A7BC8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(74, 144, 226, 0.2);
+}
+
+.save-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.save-button.loading {
+  position: relative;
+  color: transparent;
+}
+
+.save-button.loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-top: -8px;
+  margin-left: -8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .form-row,
+  .custom-field-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .custom-field-row {
+    grid-template-columns: 1fr 40px;
+    gap: 12px;
+  }
+  
+  .custom-field-row .form-group:first-child {
+    grid-column: 1 / 3;
+  }
+  
+  .remove-field-button {
+    align-self: flex-end;
+    margin-bottom: 16px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .cancel-button,
+  .save-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .recipient-create-header h1 {
+    font-size: 24px;
+  }
+  
+  .recipient-create-card {
+    padding: 20px 16px;
+  }
+}

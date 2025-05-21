@@ -1,0 +1,63 @@
+/* src/components/auth/Register.css */
+/* This extends the Login.css styles with any additional styles specific to registration */
+
+.password-requirements {
+  margin-top: 6px;
+  padding: 8px 12px;
+  background-color: #F9FAFC;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.password-requirements p {
+  margin: 0 0 6px 0;
+  color: #666;
+  font-weight: 500;
+}
+
+.requirement-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.requirement-item:last-child {
+  margin-bottom: 0;
+}
+
+.requirement-item .material-icons {
+  font-size: 14px;
+  margin-right: 6px;
+}
+
+.requirement-item.valid .material-icons {
+  color: #2ECC71;
+}
+
+.requirement-item.invalid .material-icons {
+  color: #AAB2BD;
+}
+
+.requirement-text {
+  font-size: 12px;
+  color: #666;
+}
+
+.auth-card {
+  max-width: 480px; /* Slightly wider for registration form */
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .auth-form {
+    padding: 15px 20px;
+  }
+  
+  .auth-header {
+    padding: 20px;
+  }
+  
+  .auth-card {
+    max-width: 100%;
+  }
+}

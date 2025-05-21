@@ -1,0 +1,351 @@
+/* src/components/auth/Login.css */
+.auth-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #0066cc;
+  background-image: radial-gradient(circle, rgba(30, 105, 210, 0.8) 0%, rgba(0, 80, 190, 0.9) 50%, rgba(0, 60, 170, 1) 100%);
+  overflow: hidden;
+  position: relative;
+  font-family: var(--font-family-primary);
+}
+
+.auth-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.03) 10px, transparent 300px);
+  background-repeat: repeat;
+  z-index: 1;
+}
+
+.auth-left-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  position: relative;
+  z-index: 2;
+}
+
+.brand-logo {
+  width: 120px;
+  height: 120px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.brand-logo svg {
+  width: 80px;
+  height: 80px;
+  fill: white;
+}
+
+.app-title {
+  color: white;
+  font-size: 30px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.app-description {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  line-height: 1.6;
+  text-align: center;
+  margin-bottom: 30px;
+  max-width: 400px;
+}
+
+.feature-list {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 12px 15px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.feature-icon {
+  background-color: rgba(255, 255, 255, 0.2);
+  min-width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+}
+
+.feature-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: white;
+}
+
+.feature-text {
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.auth-right-panel {
+  width: 450px;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 40px;
+  position: relative;
+  z-index: 2;
+}
+
+.auth-tabs {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 40px;
+}
+
+.auth-tab {
+  padding: 8px 16px;
+  margin-left: 8px;
+  background-color: transparent;
+  border: none;
+  color: #666;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.auth-tab.active {
+  background-color: #0066cc;
+  color: white;
+  border-radius: 4px;
+}
+
+.auth-header {
+  margin-bottom: 30px;
+}
+
+.auth-header h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 10px 0;
+}
+
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 14px;
+  color: #333;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+}
+
+.form-control::placeholder {
+  color: #aaa;
+}
+
+.forgot-password-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.forgot-password {
+  color: #666;
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.forgot-password:hover {
+  color: #0066cc;
+  text-decoration: underline;
+}
+
+.register-link {
+  color: #666;
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.register-link:hover {
+  color: #0066cc;
+  text-decoration: underline;
+}
+
+.auth-button {
+  width: 100%;
+  padding: 14px;
+  background-color: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.auth-button:hover:not(:disabled) {
+  background-color: #0052a3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.auth-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auth-button.loading {
+  position: relative;
+  color: transparent;
+}
+
+.auth-button.loading::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 50%;
+  left: 50%;
+  margin-top: -10px;
+  margin-left: -10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.auth-error {
+  display: flex;
+  align-items: center;
+  background-color: #FEECEC;
+  color: #E74C3C;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.auth-error svg {
+  margin-right: 8px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
+  .auth-container {
+    flex-direction: column;
+  }
+  
+  .auth-left-panel {
+    padding: 30px 20px;
+  }
+  
+  .auth-right-panel {
+    width: 100%;
+    max-width: 450px;
+    margin: 0 auto;
+  }
+  
+  .app-title {
+    font-size: 24px;
+    margin-bottom: 15px;
+  }
+  
+  .app-description {
+    margin-bottom: 20px;
+  }
+  
+  .feature-list {
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .auth-tabs {
+    justify-content: center;
+  }
+  
+  .auth-header h1 {
+    font-size: 24px;
+    text-align: center;
+  }
+  
+  .brand-logo {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .brand-logo svg {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .feature-list {
+    max-width: 280px;
+  }
+}

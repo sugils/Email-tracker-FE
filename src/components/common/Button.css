@@ -1,0 +1,125 @@
+/* src/components/common/Button.css */
+.button {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Button variants */
+.button-primary {
+  background-color: #4A90E2;
+  color: white;
+}
+
+.button-primary:hover:not(:disabled) {
+  background-color: #3A7BC8;
+  box-shadow: 0 2px 6px rgba(74, 144, 226, 0.3);
+}
+
+.button-secondary {
+  background-color: #F5F7FA;
+  color: #333;
+  border: 1px solid #E0E4E8;
+}
+
+.button-secondary:hover:not(:disabled) {
+  background-color: #E0E4E8;
+}
+
+.button-success {
+  background-color: #2ECC71;
+  color: white;
+}
+
+.button-success:hover:not(:disabled) {
+  background-color: #27AE60;
+  box-shadow: 0 2px 6px rgba(46, 204, 113, 0.3);
+}
+
+.button-danger {
+  background-color: #E74C3C;
+  color: white;
+}
+
+.button-danger:hover:not(:disabled) {
+  background-color: #C0392B;
+  box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
+}
+
+.button-text {
+  background-color: transparent;
+  color: #4A90E2;
+  padding: 0;
+}
+
+.button-text:hover:not(:disabled) {
+  color: #3A7BC8;
+  text-decoration: underline;
+}
+
+/* Button sizes */
+.button-small {
+  font-size: 12px;
+  padding: 4px 12px;
+  height: 28px;
+}
+
+.button-medium {
+  font-size: 14px;
+  padding: 8px 16px;
+  height: 36px;
+}
+
+.button-large {
+  font-size: 16px;
+  padding: 12px 24px;
+  height: 44px;
+}
+
+.button-full-width {
+  width: 100%;
+}
+
+/* Animation for loading state */
+.button-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.button-loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  border: 3px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: button-loading 1s ease infinite;
+}
+
+@keyframes button-loading {
+  from {
+    transform: rotate(0turn);
+  }
+  to {
+    transform: rotate(1turn);
+  }
+}
