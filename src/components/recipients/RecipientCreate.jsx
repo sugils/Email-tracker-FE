@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import RecipientService from '../../services/recipient.service';
+import GroupService from '../../services/group.service';
 import './RecipientCreate.css';
 
 const RecipientCreate = () => {
@@ -11,11 +12,13 @@ const RecipientCreate = () => {
     first_name: '',
     last_name: '',
     company: '',
-    position: ''
+    position: '',
+    group_id: ''
   });
   const [customFields, setCustomFields] = useState([
     { name: '', value: '' }
   ]);
+  const [groups, setGroups] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -23,13 +26,16 @@ const RecipientCreate = () => {
   // Ref for focus
   const emailInputRef = useRef(null);
 
-  // Focus email input on component mount
+  // Focus email input on component mount and fetch groups
   useEffect(() => {
     if (emailInputRef.current) {
       setTimeout(() => {
         emailInputRef.current.focus();
       }, 300);
     }
+    
+    // Fetch groups
+    fetchGroups();
     
     // Set page title
     document.title = 'Add Recipient | Email Campaign Manager';
@@ -39,6 +45,16 @@ const RecipientCreate = () => {
       document.title = 'Email Campaign Manager';
     };
   }, []);
+
+  const fetchGroups = async () => {
+    try {
+      const groupsData = await GroupService.getAllGroups();
+      setGroups(groupsData);
+    } catch (err) {
+      console.error('Failed to fetch groups:', err);
+      // Don't show error, groups are optional
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -173,6 +189,11 @@ const RecipientCreate = () => {
         custom_fields: Object.keys(customFieldsObj).length > 0 ? customFieldsObj : null
       };
       
+      // Remove group_id if empty
+      if (!recipientData.group_id) {
+        delete recipientData.group_id;
+      }
+      
       await RecipientService.createRecipient(recipientData);
       navigate('/recipients');
     } catch (err) {
@@ -274,6 +295,26 @@ const RecipientCreate = () => {
                 />
               </div>
             </div>
+            
+            {groups.length > 0 && (
+              <div className="form-group">
+                <label htmlFor="group_id">Group</label>
+                <select
+                  id="group_id"
+                  name="group_id"
+                  value={formData.group_id}
+                  onChange={handleChange}
+                  className="form-select"
+                >
+                  <option value="">No group (Ungrouped)</option>
+                  {groups.map(group => (
+                    <option key={group.id} value={group.id}>
+                      {group.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
           
           <div className="form-section">

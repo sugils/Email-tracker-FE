@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import CampaignService from '../../services/campaign.service';
 import RecipientService from '../../services/recipient.service';
+import GroupService from '../../services/group.service';
 import TemplateService from '../../services/template.service';
 import EmailEditor from './EmailEditor';
 import './CampaignCreate.css';
@@ -13,12 +14,15 @@ const CampaignCreate = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [recipients, setRecipients] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [selectedRecipients, setSelectedRecipients] = useState([]);
+  const [selectedGroups, setSelectedGroups] = useState([]);
   const [templateHtml, setTemplateHtml] = useState('');
   const [recipientsLoading, setRecipientsLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [stepChanged, setStepChanged] = useState(false);
+  const [recipientView, setRecipientView] = useState('all'); // 'all', 'individuals', 'groups'
   
   // Refs for animations and focus
   const contentRef = useRef(null);
@@ -38,14 +42,18 @@ const CampaignCreate = () => {
   });
 
   useEffect(() => {
-    // Load recipients on component mount
-    const loadRecipients = async () => {
+    // Load recipients and groups on component mount
+    const loadData = async () => {
       try {
         setRecipientsLoading(true);
-        const data = await RecipientService.getAllRecipients();
-        setRecipients(data);
+        const [recipientsData, groupsData] = await Promise.all([
+          RecipientService.getAllRecipients(),
+          GroupService.getAllGroups()
+        ]);
+        setRecipients(recipientsData);
+        setGroups(groupsData);
       } catch (err) {
-        console.error('Failed to load recipients:', err);
+        console.error('Failed to load data:', err);
       } finally {
         setRecipientsLoading(false);
       }
@@ -65,7 +73,7 @@ const CampaignCreate = () => {
       setTemplateHtml(defaultTemplate.html_content);
     };
 
-    loadRecipients();
+    loadData();
     loadDefaultTemplate();
     
     // Focus on campaign name input when component mounts
@@ -118,12 +126,43 @@ const CampaignCreate = () => {
     }
   };
 
+  const handleGroupSelection = (groupId) => {
+    if (selectedGroups.includes(groupId)) {
+      setSelectedGroups(selectedGroups.filter(id => id !== groupId));
+    } else {
+      setSelectedGroups([...selectedGroups, groupId]);
+    }
+  };
+
   const handleSelectAllRecipients = () => {
     if (selectedRecipients.length === recipients.length) {
       setSelectedRecipients([]);
     } else {
       setSelectedRecipients(recipients.map(recipient => recipient.recipient_id));
     }
+  };
+
+  const handleSelectAllGroups = () => {
+    if (selectedGroups.length === groups.length) {
+      setSelectedGroups([]);
+    } else {
+      setSelectedGroups(groups.map(group => group.id));
+    }
+  };
+
+  // Calculate total recipient count including groups
+  const getTotalRecipientCount = () => {
+    let count = selectedRecipients.length;
+    
+    // Add recipients from selected groups
+    selectedGroups.forEach(groupId => {
+      const group = groups.find(g => g.id === groupId);
+      if (group) {
+        count += group.recipient_count || 0;
+      }
+    });
+    
+    return count;
   };
 
   const validateStep = (step) => {
@@ -139,7 +178,7 @@ const CampaignCreate = () => {
       case 2:
         return campaignData.template.html_content.trim() !== '';
       case 3:
-        return selectedRecipients.length > 0;
+        return selectedRecipients.length > 0 || selectedGroups.length > 0;
       default:
         return true;
     }
@@ -181,7 +220,8 @@ const CampaignCreate = () => {
       
       const payload = {
         ...campaignData,
-        recipients: selectedRecipients
+        recipients: selectedRecipients,
+        groups: selectedGroups
       };
       
       const response = await CampaignService.createCampaign(payload);
@@ -304,22 +344,38 @@ const CampaignCreate = () => {
           <div className={stepContentClass}>
             <div className="campaign-recipients-step">
               <div className="recipients-header">
-                <div className="recipients-actions">
+                <div className="recipient-tabs">
                   <button 
-                    className="select-all-button"
-                    onClick={handleSelectAllRecipients}
+                    className={`tab-button ${recipientView === 'all' ? 'active' : ''}`}
+                    onClick={() => setRecipientView('all')}
                   >
-                    {selectedRecipients.length === recipients.length ? 'Deselect All' : 'Select All'}
+                    All
                   </button>
-                  <span className="selected-count">
-                    {selectedRecipients.length} of {recipients.length} selected
-                  </span>
+                  <button 
+                    className={`tab-button ${recipientView === 'groups' ? 'active' : ''}`}
+                    onClick={() => setRecipientView('groups')}
+                  >
+                    <span className="material-icons">folder</span>
+                    Groups ({groups.length})
+                  </button>
+                  <button 
+                    className={`tab-button ${recipientView === 'individuals' ? 'active' : ''}`}
+                    onClick={() => setRecipientView('individuals')}
+                  >
+                    <span className="material-icons">person</span>
+                    Individuals ({recipients.length})
+                  </button>
                 </div>
                 
-                <Link to="/recipients/create" className="add-recipient-button">
-                  <span className="material-icons">person_add</span>
-                  Add New Recipient
-                </Link>
+                <div className="recipients-actions">
+                  <span className="selected-count">
+                    {getTotalRecipientCount()} total recipients selected
+                  </span>
+                  <Link to="/recipients/create" className="add-recipient-button">
+                    <span className="material-icons">person_add</span>
+                    Add New
+                  </Link>
+                </div>
               </div>
               
               {recipientsLoading ? (
@@ -327,7 +383,7 @@ const CampaignCreate = () => {
                   <div className="loader"></div>
                   <p>Loading recipients...</p>
                 </div>
-              ) : recipients.length === 0 ? (
+              ) : recipients.length === 0 && groups.length === 0 ? (
                 <div className="no-recipients">
                   <div className="empty-state">
                     <span className="material-icons">people</span>
@@ -340,36 +396,105 @@ const CampaignCreate = () => {
                   </div>
                 </div>
               ) : (
-                <div className="recipients-list">
-                  {recipients.map((recipient) => (
-                    <div 
-                      key={recipient.recipient_id} 
-                      className={`recipient-item ${selectedRecipients.includes(recipient.recipient_id) ? 'selected' : ''}`}
-                      onClick={() => handleRecipientSelection(recipient.recipient_id)}
-                    >
-                      <div className="recipient-checkbox">
-                        <span className="material-icons">
-                          {selectedRecipients.includes(recipient.recipient_id) ? 'check_box' : 'check_box_outline_blank'}
-                        </span>
-                      </div>
-                      
-                      <div className="recipient-avatar">
-                        {recipient.first_name ? recipient.first_name.charAt(0).toUpperCase() : recipient.email.charAt(0).toUpperCase()}
-                      </div>
-                      
-                      <div className="recipient-info">
-                        <h4 className="recipient-name">
-                          {recipient.first_name && recipient.last_name 
-                            ? `${recipient.first_name} ${recipient.last_name}`
-                            : recipient.email}
+                <div className="recipients-selection">
+                  {/* Groups Section */}
+                  {(recipientView === 'all' || recipientView === 'groups') && groups.length > 0 && (
+                    <div className="groups-section">
+                      <div className="section-header">
+                        <h4>
+                          <span className="material-icons">folder</span>
+                          Groups
                         </h4>
-                        <p className="recipient-email">{recipient.email}</p>
-                        {recipient.company && (
-                          <p className="recipient-company">{recipient.company}</p>
-                        )}
+                        <button 
+                          className="select-all-button"
+                          onClick={handleSelectAllGroups}
+                        >
+                          {selectedGroups.length === groups.length ? 'Deselect All' : 'Select All'}
+                        </button>
+                      </div>
+                      
+                      <div className="groups-list">
+                        {groups.map((group) => (
+                          <div 
+                            key={group.id} 
+                            className={`group-item ${selectedGroups.includes(group.id) ? 'selected' : ''}`}
+                            onClick={() => handleGroupSelection(group.id)}
+                          >
+                            <div className="group-checkbox">
+                              <span className="material-icons">
+                                {selectedGroups.includes(group.id) ? 'check_box' : 'check_box_outline_blank'}
+                              </span>
+                            </div>
+                            
+                            <div className="group-icon">
+                              <span className="material-icons">folder</span>
+                            </div>
+                            
+                            <div className="group-info">
+                              <h4 className="group-name">{group.name}</h4>
+                              <p className="group-description">
+                                {group.description || `${group.recipient_count || 0} recipients`}
+                              </p>
+                            </div>
+                            
+                            <div className="group-count">
+                              <span className="count-badge">{group.recipient_count || 0}</span>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))}
+                  )}
+                  
+                  {/* Individual Recipients Section */}
+                  {(recipientView === 'all' || recipientView === 'individuals') && recipients.length > 0 && (
+                    <div className="individuals-section">
+                      <div className="section-header">
+                        <h4>
+                          <span className="material-icons">person</span>
+                          Individual Recipients
+                        </h4>
+                        <button 
+                          className="select-all-button"
+                          onClick={handleSelectAllRecipients}
+                        >
+                          {selectedRecipients.length === recipients.length ? 'Deselect All' : 'Select All'}
+                        </button>
+                      </div>
+                      
+                      <div className="recipients-list">
+                        {recipients.map((recipient) => (
+                          <div 
+                            key={recipient.recipient_id} 
+                            className={`recipient-item ${selectedRecipients.includes(recipient.recipient_id) ? 'selected' : ''}`}
+                            onClick={() => handleRecipientSelection(recipient.recipient_id)}
+                          >
+                            <div className="recipient-checkbox">
+                              <span className="material-icons">
+                                {selectedRecipients.includes(recipient.recipient_id) ? 'check_box' : 'check_box_outline_blank'}
+                              </span>
+                            </div>
+                            
+                            <div className="recipient-avatar">
+                              {recipient.first_name ? recipient.first_name.charAt(0).toUpperCase() : recipient.email.charAt(0).toUpperCase()}
+                            </div>
+                            
+                            <div className="recipient-info">
+                              <h4 className="recipient-name">
+                                {recipient.first_name && recipient.last_name 
+                                  ? `${recipient.first_name} ${recipient.last_name}`
+                                  : recipient.email}
+                              </h4>
+                              <p className="recipient-email">{recipient.email}</p>
+                              {recipient.company && (
+                                <p className="recipient-company">{recipient.company}</p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -404,9 +529,32 @@ const CampaignCreate = () => {
               
               <div className="review-section">
                 <h3>Recipients</h3>
-                <p className="recipients-summary">
-                  This campaign will be sent to <strong>{selectedRecipients.length}</strong> recipients.
-                </p>
+                <div className="recipients-summary">
+                  <p>This campaign will be sent to <strong>{getTotalRecipientCount()}</strong> recipients.</p>
+                  
+                  {selectedGroups.length > 0 && (
+                    <div className="selected-groups-summary">
+                      <h4>Selected Groups ({selectedGroups.length}):</h4>
+                      <ul>
+                        {selectedGroups.map(groupId => {
+                          const group = groups.find(g => g.id === groupId);
+                          return group ? (
+                            <li key={groupId}>
+                              <span className="material-icons">folder</span>
+                              {group.name} ({group.recipient_count || 0} recipients)
+                            </li>
+                          ) : null;
+                        })}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {selectedRecipients.length > 0 && (
+                    <div className="selected-individuals-summary">
+                      <h4>Individual Recipients: {selectedRecipients.length}</h4>
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="review-section">

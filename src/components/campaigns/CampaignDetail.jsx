@@ -270,7 +270,7 @@ const CampaignDetail = () => {
         >
           <span className="material-icons">people</span>
           Recipients
-          <span className="counter">{campaign.recipients?.length || 0}</span>
+          <span className="counter">{campaign.recipient_count || campaign.recipients?.length || 0}</span>
         </button>
         
         <button
@@ -319,6 +319,15 @@ const CampaignDetail = () => {
                   <span className="detail-value"><CampaignStatus status={campaign.status} /></span>
                 </div>
                 <div className="detail-row">
+                  <span className="detail-label">Recipients</span>
+                  <span className="detail-value">
+                    {campaign.recipient_count || campaign.recipients?.length || 0} total
+                    {campaign.groups && campaign.groups.length > 0 && (
+                      <span className="group-info"> ({campaign.groups.length} groups)</span>
+                    )}
+                  </span>
+                </div>
+                <div className="detail-row">
                   <span className="detail-label">Created</span>
                   <span className="detail-value">{formatDate(campaign.created_at)}</span>
                 </div>
@@ -335,6 +344,23 @@ const CampaignDetail = () => {
                   </div>
                 )}
               </div>
+              
+              {campaign.groups && campaign.groups.length > 0 && (
+                <div className="detail-card">
+                  <h3>Groups</h3>
+                  <div className="groups-list">
+                    {campaign.groups.map((group) => (
+                      <div key={group.id} className="group-item-detail">
+                        <span className="material-icons">folder</span>
+                        <div className="group-info">
+                          <span className="group-name">{group.name}</span>
+                          <span className="group-count">{group.recipient_count || 0} recipients</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               
               {campaign.status === 'completed' && campaign.tracking_stats && (
                 <div className="stats-card">
@@ -408,6 +434,7 @@ const CampaignDetail = () => {
                   <div className="recipient-email-col">Email</div>
                   <div className="recipient-company-col">Company</div>
                   <div className="recipient-position-col">Position</div>
+                  <div className="recipient-group-col">Group</div>
                   {campaign.status === 'completed' && (
                     <>
                       <div className="recipient-opened-col">Opened</div>
@@ -440,6 +467,9 @@ const CampaignDetail = () => {
                         </div>
                         <div className="recipient-position-col">
                           {recipient.position || '–'}
+                        </div>
+                        <div className="recipient-group-col">
+                          {recipient.group_name || '–'}
                         </div>
                         
                         {campaign.status === 'completed' && (

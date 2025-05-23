@@ -22,10 +22,30 @@ const CampaignService = {
 
   createCampaign: async (campaignData) => {
     try {
-      const response = await api.post('/campaigns', campaignData);
+      // Add groups support to the campaign data
+      const payload = {
+        ...campaignData,
+        recipients: campaignData.recipients || [],
+        groups: campaignData.groups || []
+      };
+      const response = await api.post('/campaigns', payload);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Failed to create campaign' };
+    }
+  },
+
+  updateCampaign: async (campaignId, campaignData) => {
+    try {
+      const payload = {
+        ...campaignData,
+        recipients: campaignData.recipients || [],
+        groups: campaignData.groups || []
+      };
+      const response = await api.put(`/campaigns/${campaignId}`, payload);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to update campaign' };
     }
   },
 
@@ -44,6 +64,34 @@ const CampaignService = {
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Failed to fetch dashboard data' };
+    }
+  },
+
+  // New methods for group support
+  duplicateCampaign: async (campaignId) => {
+    try {
+      const response = await api.post(`/campaigns/${campaignId}/duplicate`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to duplicate campaign' };
+    }
+  },
+
+  markEmailReplied: async (campaignId, recipientId) => {
+    try {
+      const response = await api.post(`/campaigns/${campaignId}/recipients/${recipientId}/replied`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to mark email as replied' };
+    }
+  },
+
+  getCampaignStats: async (campaignId) => {
+    try {
+      const response = await api.get(`/campaigns/${campaignId}/stats`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to fetch campaign stats' };
     }
   }
 };

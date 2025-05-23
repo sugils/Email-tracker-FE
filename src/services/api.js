@@ -1,7 +1,7 @@
 // src/services/api.js
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -14,9 +14,9 @@ const api = axios.create({
 // Add request interceptor to attach the JWT token to every request
 api.interceptors.request.use(
   (config) => {
+    // Note: Your auth service stores the token as 'token', not 'access_token'
     const token = localStorage.getItem('token');
     if (token) {
-      // Proper format for JWT token in Authorization header
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -28,18 +28,15 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle 401 Unauthorized errors (token expired or invalid)
+    // Handle 401 Unauthorized errors
     if (error.response && error.response.status === 401) {
-      console.log('Unauthorized: Logging out user');
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-    }
-    
-    // Handle 403 Forbidden errors (insufficient permissions)
-    if (error.response && error.response.status === 403) {
-      console.error('Forbidden: User lacks permission for this resource');
-      // You can handle this differently, e.g., show a message but don't log out
+      // Check if we're already on the login page to avoid redirect loop
+      if (!window.location.pathname.includes('/login')) {
+        console.log('Unauthorized: Logging out user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
     }
     
     return Promise.reject(error);
@@ -47,22 +44,3 @@ api.interceptors.response.use(
 );
 
 export default api;
-
-// Add this to auth.service.js to handle token refresh if needed
-const refreshToken = async () => {
-  try {
-    // Example refresh token implementation (you would need to add this endpoint to your backend)
-    const response = await axios.post(`${API_URL}/refresh-token`, {
-      token: localStorage.getItem('token'),
-    });
-    
-    if (response.data && response.data.access_token) {
-      localStorage.setItem('token', response.data.access_token);
-      return response.data.access_token;
-    }
-    return null;
-  } catch (error) {
-    console.error('Error refreshing token:', error);
-    return null;
-  }
-};
