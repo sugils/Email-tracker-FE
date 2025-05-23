@@ -1,7 +1,8 @@
-// src/components/campaigns/CampaignDetail.jsx
+// Modified src/components/campaigns/CampaignDetail.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import CampaignService from '../../services/campaign.service';
+import GroupService from '../../services/group.service';
 import './CampaignDetail.css';
 
 const CampaignStatus = ({ status }) => {
@@ -38,17 +39,52 @@ const CampaignDetail = () => {
   const [campaignSendSuccess, setCampaignSendSuccess] = useState(false);
   const [markingReplied, setMarkingReplied] = useState(false);
   const [replySuccess, setReplySuccess] = useState(false);
+  const [groupRecipients, setGroupRecipients] = useState({});
+  const [loadingGroupRecipients, setLoadingGroupRecipients] = useState(false);
 
   const fetchCampaign = async () => {
     try {
       setLoading(true);
       const data = await CampaignService.getCampaignById(campaignId);
       setCampaign(data);
+      
+      // If there are groups, fetch recipients for each group
+      if (data.groups && data.groups.length > 0) {
+        await fetchGroupRecipients(data.groups);
+      }
     } catch (err) {
       setError(err.message || 'Failed to fetch campaign details');
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+  
+  // New function to fetch recipients for each group
+  const fetchGroupRecipients = async (groups) => {
+    try {
+      setLoadingGroupRecipients(true);
+      const groupRecipientsObj = {};
+      
+      // Create an array of promises for fetching recipients for each group
+      const promises = groups.map(async (group) => {
+        try {
+          const recipients = await GroupService.getGroupRecipients(group.id);
+          groupRecipientsObj[group.id] = recipients;
+        } catch (err) {
+          console.error(`Failed to fetch recipients for group ${group.id}:`, err);
+          groupRecipientsObj[group.id] = []; // Set empty array if fetch fails
+        }
+      });
+      
+      // Wait for all promises to resolve
+      await Promise.all(promises);
+      
+      setGroupRecipients(groupRecipientsObj);
+    } catch (err) {
+      console.error('Failed to fetch group recipients:', err);
+    } finally {
+      setLoadingGroupRecipients(false);
     }
   };
 
@@ -151,6 +187,47 @@ const CampaignDetail = () => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  // Calculate total recipient count including group recipients
+  const getTotalRecipientCount = () => {
+    let count = 0;
+    
+    // Count individual recipients
+    if (campaign?.recipients) {
+      count += campaign.recipients.length;
+    }
+    
+    // Count recipients from groups
+    if (campaign?.groups) {
+      campaign.groups.forEach(group => {
+        count += group.recipient_count || 0;
+      });
+    }
+    
+    return count;
+  };
+
+  // Get all recipients including those from groups
+  const getAllRecipients = () => {
+    const allRecipients = [];
+    
+    // Add individual recipients
+    if (campaign?.recipients) {
+      allRecipients.push(...campaign.recipients);
+    }
+    
+    // Add recipients from groups
+    if (campaign?.groups) {
+      campaign.groups.forEach(group => {
+        const groupId = group.id;
+        if (groupRecipients[groupId]) {
+          allRecipients.push(...groupRecipients[groupId]);
+        }
+      });
+    }
+    
+    return allRecipients;
+  };
+
   if (loading) {
     return (
       <div className="campaign-detail-loading">
@@ -176,6 +253,10 @@ const CampaignDetail = () => {
 
   if (!campaign) return null;
 
+  // Get all recipients for display
+  const allRecipients = getAllRecipients();
+  const totalRecipientCount = getTotalRecipientCount();
+
   return (
     <div className="campaign-detail-container">
       <div className="campaign-detail-header">
@@ -197,7 +278,7 @@ const CampaignDetail = () => {
               <button
                 className={`test-send-button ${sendingTest ? 'loading' : ''}`}
                 onClick={handleSendTest}
-                disabled={sendingTest || sendingCampaign}
+                disabled={sendingTest || sendingCampaign || totalRecipientCount === 0}
               >
                 <span className="material-icons">science</span>
                 Send Test
@@ -206,7 +287,7 @@ const CampaignDetail = () => {
               <button
                 className={`send-campaign-button ${sendingCampaign ? 'loading' : ''}`}
                 onClick={handleSendCampaign}
-                disabled={sendingTest || sendingCampaign}
+                disabled={sendingTest || sendingCampaign || totalRecipientCount === 0}
               >
                 <span className="material-icons">send</span>
                 Send Campaign
@@ -270,7 +351,7 @@ const CampaignDetail = () => {
         >
           <span className="material-icons">people</span>
           Recipients
-          <span className="counter">{campaign.recipient_count || campaign.recipients?.length || 0}</span>
+          <span className="counter">{totalRecipientCount}</span>
         </button>
         
         <button
@@ -321,7 +402,7 @@ const CampaignDetail = () => {
                 <div className="detail-row">
                   <span className="detail-label">Recipients</span>
                   <span className="detail-value">
-                    {campaign.recipient_count || campaign.recipients?.length || 0} total
+                    {totalRecipientCount} total
                     {campaign.groups && campaign.groups.length > 0 && (
                       <span className="group-info"> ({campaign.groups.length} groups)</span>
                     )}
@@ -427,7 +508,7 @@ const CampaignDetail = () => {
               )}
             </div>
             
-            {campaign.recipients?.length > 0 ? (
+            {(allRecipients && allRecipients.length > 0) ? (
               <div className="recipients-table">
                 <div className="recipients-table-header">
                   <div className="recipient-name-col">Name</div>
@@ -445,13 +526,27 @@ const CampaignDetail = () => {
                 </div>
                 
                 <div className="recipients-table-body">
-                  {campaign.recipients.map((recipient) => {
+                  {allRecipients.map((recipient) => {
                     // Find tracking data for this recipient if campaign is completed
                     let trackingData = null;
                     if (campaign.status === 'completed' && campaign.tracking_stats) {
                       trackingData = campaign.tracking_stats.recipients.find(
                         t => t.recipient_id === recipient.recipient_id
                       );
+                    }
+                    
+                    // Find the group this recipient belongs to
+                    let groupName = recipient.group_name || '';
+                    if (!groupName && campaign.groups) {
+                      for (const groupId in groupRecipients) {
+                        if (groupRecipients[groupId].some(r => r.recipient_id === recipient.recipient_id)) {
+                          const group = campaign.groups.find(g => g.id === groupId);
+                          if (group) {
+                            groupName = group.name;
+                            break;
+                          }
+                        }
+                      }
                     }
                     
                     return (
@@ -469,7 +564,7 @@ const CampaignDetail = () => {
                           {recipient.position || '–'}
                         </div>
                         <div className="recipient-group-col">
-                          {recipient.group_name || '–'}
+                          {groupName || '–'}
                         </div>
                         
                         {campaign.status === 'completed' && (
@@ -537,6 +632,14 @@ const CampaignDetail = () => {
                     </Link>
                   )}
                 </div>
+              </div>
+            )}
+            
+            {/* Loading indicator for group recipients */}
+            {loadingGroupRecipients && (
+              <div className="loading-indicator">
+                <div className="loader-small"></div>
+                <p>Loading group recipients...</p>
               </div>
             )}
           </div>

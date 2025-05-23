@@ -1,4 +1,4 @@
-// src/services/campaign.service.js
+// Enhanced src/services/campaign.service.js
 import api from './api';
 
 const CampaignService = {
@@ -22,27 +22,46 @@ const CampaignService = {
 
   createCampaign: async (campaignData) => {
     try {
-      // Add groups support to the campaign data
-      const payload = {
+      // Process groups and recipients for proper format
+      const processedData = {
         ...campaignData,
         recipients: campaignData.recipients || [],
-        groups: campaignData.groups || []
+        groups: Array.isArray(campaignData.groups) 
+          ? campaignData.groups 
+          : (campaignData.groups ? [campaignData.groups] : [])
       };
-      const response = await api.post('/campaigns', payload);
+      
+      // If groups are provided as IDs, convert to proper format
+      if (processedData.groups.length > 0 && typeof processedData.groups[0] !== 'object') {
+        processedData.groups = processedData.groups.map(id => ({ id }));
+      }
+      
+      // Make API request with correctly formatted data
+      const response = await api.post('/campaigns', processedData);
       return response.data;
     } catch (error) {
+      console.error('Error in createCampaign:', error);
       throw error.response?.data || { message: 'Failed to create campaign' };
     }
   },
 
   updateCampaign: async (campaignId, campaignData) => {
     try {
-      const payload = {
+      // Process groups and recipients for proper format
+      const processedData = {
         ...campaignData,
         recipients: campaignData.recipients || [],
-        groups: campaignData.groups || []
+        groups: Array.isArray(campaignData.groups) 
+          ? campaignData.groups 
+          : (campaignData.groups ? [campaignData.groups] : [])
       };
-      const response = await api.put(`/campaigns/${campaignId}`, payload);
+      
+      // If groups are provided as IDs, convert to proper format
+      if (processedData.groups.length > 0 && typeof processedData.groups[0] !== 'object') {
+        processedData.groups = processedData.groups.map(id => ({ id }));
+      }
+      
+      const response = await api.put(`/campaigns/${campaignId}`, processedData);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Failed to update campaign' };
@@ -67,7 +86,7 @@ const CampaignService = {
     }
   },
 
-  // New methods for group support
+  // Enhanced method for duplicating campaign
   duplicateCampaign: async (campaignId) => {
     try {
       const response = await api.post(`/campaigns/${campaignId}/duplicate`);
@@ -77,6 +96,7 @@ const CampaignService = {
     }
   },
 
+  // Mark email as replied
   markEmailReplied: async (campaignId, recipientId) => {
     try {
       const response = await api.post(`/campaigns/${campaignId}/recipients/${recipientId}/replied`);
@@ -86,12 +106,43 @@ const CampaignService = {
     }
   },
 
+  // Get campaign statistics
   getCampaignStats: async (campaignId) => {
     try {
       const response = await api.get(`/campaigns/${campaignId}/stats`);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Failed to fetch campaign stats' };
+    }
+  },
+  
+  // Add recipients to a campaign
+  addRecipientsToCampaign: async (campaignId, data) => {
+    try {
+      const payload = {
+        recipients: data.recipients || [],
+        groups: data.groups || []
+      };
+      
+      const response = await api.post(`/campaigns/${campaignId}/recipients`, payload);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to add recipients to campaign' };
+    }
+  },
+  
+  // Remove recipients from a campaign
+  removeRecipientsFromCampaign: async (campaignId, data) => {
+    try {
+      const payload = {
+        recipient_ids: data.recipientIds || [],
+        group_ids: data.groupIds || []
+      };
+      
+      const response = await api.post(`/campaigns/${campaignId}/recipients/remove`, payload);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to remove recipients from campaign' };
     }
   }
 };

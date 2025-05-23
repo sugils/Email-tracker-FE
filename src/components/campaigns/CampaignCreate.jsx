@@ -24,6 +24,11 @@ const CampaignCreate = () => {
   const [stepChanged, setStepChanged] = useState(false);
   const [recipientView, setRecipientView] = useState('all'); // 'all', 'individuals', 'groups'
   
+  // New state for expanded groups and group recipients
+  const [expandedGroups, setExpandedGroups] = useState({});
+  const [groupRecipients, setGroupRecipients] = useState({});
+  const [isLoadingGroupRecipients, setIsLoadingGroupRecipients] = useState({});
+  
   // Refs for animations and focus
   const contentRef = useRef(null);
   const campaignNameRef = useRef(null);
@@ -52,6 +57,13 @@ const CampaignCreate = () => {
         ]);
         setRecipients(recipientsData);
         setGroups(groupsData);
+        
+        // Initialize expanded groups state
+        const initialExpanded = {};
+        groupsData.forEach(group => {
+          initialExpanded[group.id] = false;
+        });
+        setExpandedGroups(initialExpanded);
       } catch (err) {
         console.error('Failed to load data:', err);
       } finally {
@@ -149,7 +161,37 @@ const CampaignCreate = () => {
       setSelectedGroups(groups.map(group => group.id));
     }
   };
+  
+  // Function to toggle group expansion and fetch recipients if needed
+ // Updated toggleExpandGroup function for your backend
+const toggleExpandGroup = async (groupId, e) => {
+  // Stop event propagation to prevent group selection when clicking expand button
+  if (e) {
+    e.stopPropagation();
+  }
+  
+  // Toggle expanded state
+  setExpandedGroups(prev => ({
+    ...prev,
+    [groupId]: !prev[groupId]
+  }));
 
+  // If we're expanding and don't already have the recipients, fetch them
+  if (!expandedGroups[groupId] && !groupRecipients[groupId]) {
+    try {
+      setIsLoadingGroupRecipients(prev => ({ ...prev, [groupId]: true }));
+      // Use the existing API endpoint that returns both group and recipients
+      const groupData = await GroupService.getGroup(groupId);
+      if (groupData && groupData.recipients) {
+        setGroupRecipients(prev => ({ ...prev, [groupId]: groupData.recipients }));
+      }
+    } catch (err) {
+      console.error(`Failed to fetch recipients for group ${groupId}:`, err);
+    } finally {
+      setIsLoadingGroupRecipients(prev => ({ ...prev, [groupId]: false }));
+    }
+  }
+};
   // Calculate total recipient count including groups
   const getTotalRecipientCount = () => {
     let count = selectedRecipients.length;
@@ -415,31 +457,81 @@ const CampaignCreate = () => {
                       
                       <div className="groups-list">
                         {groups.map((group) => (
-                          <div 
-                            key={group.id} 
-                            className={`group-item ${selectedGroups.includes(group.id) ? 'selected' : ''}`}
-                            onClick={() => handleGroupSelection(group.id)}
-                          >
-                            <div className="group-checkbox">
-                              <span className="material-icons">
-                                {selectedGroups.includes(group.id) ? 'check_box' : 'check_box_outline_blank'}
-                              </span>
+                          <div key={group.id} className="group-container">
+                            <div 
+                              className={`group-item ${selectedGroups.includes(group.id) ? 'selected' : ''}`}
+                              onClick={() => handleGroupSelection(group.id)}
+                            >
+                              <div className="group-checkbox">
+                                <span className="material-icons">
+                                  {selectedGroups.includes(group.id) ? 'check_box' : 'check_box_outline_blank'}
+                                </span>
+                              </div>
+                              
+                              <div className="group-icon">
+                                <span className="material-icons">folder</span>
+                              </div>
+                              
+                              <div className="group-info">
+                                <h4 className="group-name">{group.name}</h4>
+                                <p className="group-description">
+                                  {group.description || `${group.recipient_count || 0} recipients`}
+                                </p>
+                              </div>
+                              
+                              <div className="group-count">
+                                <span className="count-badge">{group.recipient_count || 0}</span>
+                              </div>
+                              
+                              <button 
+                                className="group-toggle-button"
+                                onClick={(e) => toggleExpandGroup(group.id, e)}
+                                title={expandedGroups[group.id] ? "Hide recipients" : "Show recipients"}
+                              >
+                                <span className="material-icons">
+                                  {expandedGroups[group.id] ? 'expand_less' : 'expand_more'}
+                                </span>
+                              </button>
                             </div>
                             
-                            <div className="group-icon">
-                              <span className="material-icons">folder</span>
-                            </div>
-                            
-                            <div className="group-info">
-                              <h4 className="group-name">{group.name}</h4>
-                              <p className="group-description">
-                                {group.description || `${group.recipient_count || 0} recipients`}
-                              </p>
-                            </div>
-                            
-                            <div className="group-count">
-                              <span className="count-badge">{group.recipient_count || 0}</span>
-                            </div>
+                            {/* Expanded view showing recipients in this group */}
+                            {expandedGroups[group.id] && (
+                              <div className="group-recipients">
+                                <div className="recipients-preview-header">
+                                  <span>Recipients in this group</span>
+                                  <span>
+                                    {isLoadingGroupRecipients[group.id] ? 'Loading...' : 
+                                    groupRecipients[group.id] ? groupRecipients[group.id].length : '0'} total
+                                  </span>
+                                </div>
+                                
+                                {isLoadingGroupRecipients[group.id] ? (
+                                  <div className="loading-indicator">Loading group recipients...</div>
+                                ) : groupRecipients[group.id] && groupRecipients[group.id].length > 0 ? (
+                                  <div className="recipients-preview-list">
+                                    {groupRecipients[group.id].map(recipient => (
+                                      <div key={recipient.recipient_id} className="recipient-preview-item">
+                                        <div className="recipient-preview-avatar">
+                                          {recipient.first_name ? 
+                                            recipient.first_name.charAt(0).toUpperCase() : 
+                                            recipient.email.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div className="recipient-preview-info">
+                                          <div className="recipient-preview-name">
+                                            {recipient.first_name && recipient.last_name 
+                                              ? `${recipient.first_name} ${recipient.last_name}`
+                                              : 'No name'}
+                                          </div>
+                                          <div className="recipient-preview-email">{recipient.email}</div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div className="empty-list">No recipients in this group</div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>

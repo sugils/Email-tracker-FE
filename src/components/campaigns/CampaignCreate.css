@@ -1033,3 +1033,221 @@
     font-size: 12px;
   }
 }
+
+/* Additional CSS for CampaignCreate.css to support group expansion */
+
+/* Group container styling */
+.group-container {
+  border-bottom: 1px solid #F0F0F0;
+}
+
+.group-container:last-child {
+  border-bottom: none;
+}
+
+/* Group toggle button */
+.group-toggle-button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-left: 8px;
+}
+
+.group-toggle-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #4A90E2;
+}
+
+.group-toggle-button .material-icons {
+  font-size: 18px;
+  transition: transform 0.2s ease;
+}
+
+/* Group recipients expanded section */
+.group-recipients {
+  background-color: #F9FAFC;
+  padding: 16px;
+  border-bottom: 1px solid #F0F0F0;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+    transform: translateY(0);
+  }
+}
+
+.recipients-preview-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.recipients-preview-list {
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: white;
+  border-radius: 6px;
+  border: 1px solid #E0E4E8;
+}
+
+.recipient-preview-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid #F0F0F0;
+}
+
+.recipient-preview-item:last-child {
+  border-bottom: none;
+}
+
+.recipient-preview-item:hover {
+  background-color: #F9FAFC;
+}
+
+.recipient-preview-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #4A90E2;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  margin-right: 12px;
+  font-size: 12px;
+}
+
+.recipient-preview-info {
+  flex: 1;
+}
+
+.recipient-preview-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.recipient-preview-email {
+  font-size: 12px;
+  color: #666;
+}
+
+.loading-indicator {
+  text-align: center;
+  padding: 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+.empty-list {
+  text-align: center;
+  padding: 16px;
+  color: #666;
+  font-style: italic;
+  font-size: 14px;
+}
+
+/* Enhance the group item hover effect */
+.group-item:hover {
+  background-color: #F9FAFC;
+}
+
+.group-item.selected {
+  background-color: #EBF5FF;
+}
+
+/* Selection count badge styling */
+.selected-count {
+  font-size: 14px;
+  color: #666;
+  background-color: #F0F0F0;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.selected-count strong {
+  color: #4A90E2;
+  font-weight: 600;
+}
+
+/* Selected groups summary in review section */
+.selected-groups-summary {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #F0F0F0;
+}
+
+.selected-groups-summary h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 12px 0;
+}
+
+.selected-groups-summary ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.selected-groups-summary li {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.selected-groups-summary li .material-icons {
+  font-size: 18px;
+  color: #4A90E2;
+  margin-right: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .group-recipients {
+    padding: 12px;
+  }
+  
+  .recipient-preview-item {
+    padding: 8px 10px;
+  }
+  
+  .group-toggle-button {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (max-width: 576px) {
+  .recipients-preview-list {
+    max-height: 150px;
+  }
+  
+  .group-toggle-button .material-icons {
+    font-size: 16px;
+  }
+}

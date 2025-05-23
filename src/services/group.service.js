@@ -17,17 +17,15 @@ class GroupService {
   }
 
   // Get a single group by ID
-  async getGroup(groupId) {
-    try {
-      const response = await api.get(`/groups/${groupId}`);
-      return {
-        ...response.data,
-        recipient_count: response.data.recipient_count || response.data.recipients_count || 0
-      };
-    } catch (error) {
-      this.handleError(error);
-    }
+// Make sure your GroupService has this method:
+async getGroup(groupId) {
+  try {
+    const response = await api.get(`/groups/${groupId}`);
+    return response.data;
+  } catch (error) {
+    this.handleError(error);
   }
+}
 
   // Create a new group
   async createGroup(groupData) {
@@ -92,6 +90,18 @@ class GroupService {
       this.handleError(error);
     }
   }
+  // Add this method to your group.service.js file
+
+
+// Get recipients in a group
+async getGroupRecipients(groupId) {
+  try {
+    const response = await api.get(`/groups/${groupId}/recipients`);
+    return response.data;
+  } catch (error) {
+    this.handleError(error);
+  }
+}
 
   // Get group statistics
   async getGroupStats(groupId) {
